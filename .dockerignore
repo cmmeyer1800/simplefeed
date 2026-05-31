@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env
+.venv
+.ruff_cache
+.pytest_cache
+tests/
+*.egg-info
+__pycache__/
+*.pyc
+*.pyo
+.python-version
+CLAUDE.md
+README.md
+helm/
