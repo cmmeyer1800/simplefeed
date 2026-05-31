@@ -1,0 +1,6 @@
+apiVersion: v2
+name: simplefeed
+description: Single-page podcast episode browser with Pushover push notifications
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

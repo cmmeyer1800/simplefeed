@@ -1,0 +1,47 @@
+# simplefeed keeps all state in-memory, so replicaCount must stay at 1.
+# Multiple replicas would each maintain independent _channel state and send
+# duplicate Pushover notifications for every new episode.
+replicaCount: 1
+
+image:
+  repository: simplefeed
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: simplefeed.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Non-sensitive application configuration (mounted as ConfigMap env vars)
+config:
+  # Required: full URL of the RSS feed to monitor
+  rssFeed: ""
+  # Poll interval in seconds
+  refreshInterval: 300
+
+# Sensitive credentials (mounted as Secret env vars)
+secret:
+  # Required: Pushover application token
+  pushoverToken: ""
+  # Required: JSON array of Pushover user keys, e.g. '["userkey1","userkey2"]'
+  pushoverUsers: "[]"
+
+resources: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
