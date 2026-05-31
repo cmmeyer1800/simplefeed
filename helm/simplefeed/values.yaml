@@ -33,7 +33,10 @@ config:
   # Poll interval in seconds
   refreshInterval: 300
 
-# Sensitive credentials (mounted as Secret env vars)
+# If set, use this existing Secret name instead of creating one from the values below.
+existingSecret: ""
+
+# Sensitive credentials (mounted as Secret env vars) — ignored when existingSecret is set
 secret:
   # Required: Pushover application token
   pushoverToken: ""

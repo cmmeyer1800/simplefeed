@@ -26,7 +26,7 @@ spec:
             - configMapRef:
                 name: {{ include "simplefeed.fullname" . }}
             - secretRef:
-                name: {{ include "simplefeed.fullname" . }}
+                name: {{ default (include "simplefeed.fullname" .) .Values.existingSecret }}
           livenessProbe:
             httpGet:
               path: /
