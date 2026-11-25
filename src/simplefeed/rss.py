@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as ET
-from io import StringIO
 
 import httpx
 
@@ -18,10 +17,14 @@ async def parse_rss_feed(url: str) -> list[Channel]:
     if resp.status_code != 200:
         return []
 
-    tree = ET.parse(StringIO(resp.text))
+    # Parse the raw bytes, not resp.text. The production feed is ~7 MB and contains
+    # emoji, so resp.text is a ~29 MB str (4 bytes/char) and StringIO makes a second
+    # copy. Those ~30 MB transient buffers fragment glibc's heap, and RSS grew ~6 MB
+    # per poll until the pod was OOMKilled every few hours. Parsing bytes keeps the
+    # transient at the feed's size, and ElementTree honours the XML encoding declaration.
+    root = ET.fromstring(resp.content)
 
     chans: list[Channel] = []
-    root = tree.getroot()
     for channel in root.findall("./channel"):
         chan_title = get_attr_or(channel, "title")
         chan_link = get_attr_or(channel, "link")

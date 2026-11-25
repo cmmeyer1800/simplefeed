@@ -96,6 +96,38 @@ async def test_item_missing_title_is_skipped():
 
 
 @respx.mock
+async def test_parses_non_ascii_utf8_bytes():
+    xml = _rss(
+        "<title>Café Cast ☕</title>"
+        "<link>https://example.com</link>"
+        "<item><title>Episode 🎙️ naïve</title><description>Ünïcödé 😀</description></item>"
+    )
+    respx.get(FEED_URL).mock(
+        return_value=httpx.Response(200, content=xml.encode("utf-8"))
+    )
+    channels = await parse_rss_feed(FEED_URL)
+    assert channels[0].title == "Café Cast ☕"
+    assert channels[0].episodes[0].title == "Episode 🎙️ naïve"
+    assert channels[0].episodes[0].description == "Ünïcödé 😀"
+
+
+@respx.mock
+async def test_honours_xml_encoding_declaration():
+    xml = (
+        "<?xml version='1.0' encoding='ISO-8859-1'?><rss version='2.0'><channel>"
+        "<title>Café</title><link>https://example.com</link>"
+        "<item><title>Épisode</title><description>d</description></item>"
+        "</channel></rss>"
+    )
+    respx.get(FEED_URL).mock(
+        return_value=httpx.Response(200, content=xml.encode("iso-8859-1"))
+    )
+    channels = await parse_rss_feed(FEED_URL)
+    assert channels[0].title == "Café"
+    assert channels[0].episodes[0].title == "Épisode"
+
+
+@respx.mock
 async def test_youtube_link_extracted_in_episode():
     xml = _rss(
         "<title>Video Cast</title>"
